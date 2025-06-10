@@ -4,7 +4,6 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const app = express();
 
-const PORT = process.env.PORT || 3000;
 const user = process.env.DB_USER;
 const password = process.env.DB_PASSWORD;
 
@@ -26,6 +25,7 @@ app.get('/', (req, res) => {
 });
 
 // Start the server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Inventory Servermain is live at http://10.0.2.2:${PORT}`);
+    console.log(` Server running on port ${PORT}`);
 });
