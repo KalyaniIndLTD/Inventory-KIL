@@ -1,0 +1,170 @@
+[
+    {
+        "type": "IN",
+        "product": "Saphaer",
+        "quantity": 5,
+        "date": "2025-06-02T09:40:13.718Z"
+    },
+    {
+        "type": "IN",
+        "product": "SaphaerLabel",
+        "quantity": 5,
+        "date": "2025-06-02T09:40:24.674Z"
+    },
+    {
+        "type": "IN",
+        "product": "Oil",
+        "quantity": 5,
+        "date": "2025-06-02T09:40:29.065Z"
+    },
+    {
+        "type": "IN",
+        "product": "Sugar",
+        "quantity": 5,
+        "date": "2025-06-02T09:40:33.301Z"
+    },
+    {
+        "type": "IN",
+        "product": "SaphaerBMF",
+        "quantity": 5,
+        "date": "2025-06-02T09:40:37.887Z"
+    },
+    {
+        "type": "IN",
+        "product": "SaphaerCap",
+        "quantity": 5,
+        "date": "2025-06-02T09:40:51.927Z"
+    },
+    {
+        "type": "IN",
+        "product": "SaphaerMCB",
+        "quantity": 5,
+        "date": "2025-06-02T09:40:56.456Z"
+    },
+    {
+        "type": "IN",
+        "product": "SaphaerMCB",
+        "quantity": 1,
+        "date": "2025-06-03T06:03:39.978Z"
+    },
+    {
+        "type": "IN",
+        "product": "Box",
+        "quantity": 5,
+        "date": "2025-06-03T07:19:32.166Z"
+    },
+    {
+        "type": "OUT",
+        "product": "Box",
+        "quantity": 2,
+        "date": "2025-06-03T07:20:02.311Z"
+    },
+    {
+        "type": "IN",
+        "product": "Box",
+        "quantity": 1,
+        "date": "2025-06-03T07:51:19.366Z"
+    },
+    {
+        "type": "IN",
+        "product": "Sugar",
+        "quantity": 2,
+        "date": "2025-06-03T07:52:25.101Z"
+    },
+    {
+        "type": "IN",
+        "product": "Oil",
+        "quantity": 1,
+        "date": "2025-06-03T08:00:24.232Z"
+    },
+    {
+        "type": "IN",
+        "product": "Box",
+        "quantity": 1,
+        "date": "2025-06-03T08:12:36.001Z"
+    },
+    {
+        "type": "OUT",
+        "product": "Box",
+        "quantity": 2,
+        "date": "2025-06-03T09:48:19.771Z"
+    },
+    {
+        "type": "IN",
+        "product": "Box",
+        "quantity": 1,
+        "date": "2025-06-03T11:20:52.165Z"
+    },
+    {
+        "type": "OUT",
+        "product": "Box",
+        "quantity": 1,
+        "date": "2025-06-03T11:21:28.824Z"
+    },
+    {
+        "type": "IN",
+        "product": "Oil",
+        "quantity": 1,
+        "date": "2025-06-03T11:28:06.977Z"
+    },
+    {
+        "type": "OUT",
+        "product": "Oil",
+        "quantity": 2,
+        "date": "2025-06-03T11:37:46.840Z"
+    },
+    {
+        "type": "IN",
+        "product": "Box",
+        "quantity": 1,
+        "date": "2025-06-03T11:38:43.208Z"
+    },
+    {
+        "type": "IN",
+        "product": "Saphaer",
+        "quantity": 1,
+        "date": "2025-06-04T06:17:27.864Z"
+    },
+    {
+        "type": "IN",
+        "product": "SaphaerBaitLabel",
+        "quantity": 2,
+        "date": "2025-06-04T06:18:08.068Z"
+    },
+    {
+        "type": "IN",
+        "product": "SaphaerBaitLabel",
+        "quantity": 1,
+        "date": "2025-06-04T06:18:17.869Z"
+    },
+    {
+        "type": "OUT",
+        "product": "Oil",
+        "quantity": 1,
+        "date": "2025-06-04T09:03:52.267Z"
+    },
+    {
+        "type": "OUT",
+        "product": "Sugar",
+        "quantity": 2,
+        "date": "2025-06-04T10:57:28.513Z"
+    },
+    {
+        "type": "IN",
+        "product": "Oil",
+        "quantity": 1,
+        "date": "2025-06-07T05:11:35.665Z"
+    },
+    {
+        "type": "OUT",
+        "product": "Oil",
+        "quantity": 1,
+        "date": "2025-06-07T08:11:51.005Z"
+    },
+    {
+        "type": "IN",
+        "product": "Oil",
+        "quantity": 1,
+        "date": "2025-06-09T06:46:21.829Z"
+    }
+]

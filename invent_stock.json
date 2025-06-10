@@ -1,0 +1,47 @@
+{
+    "Saphaer": {
+        "purchased": 6,
+        "consumption": 0,
+        "stock": 6
+    },
+    "SaphaerLabel": {
+        "purchased": 5,
+        "consumption": 0,
+        "stock": 5
+    },
+    "Oil": {
+        "purchased": 9,
+        "consumption": 4,
+        "stock": 5
+    },
+    "Sugar": {
+        "purchased": 7,
+        "consumption": 2,
+        "stock": 5
+    },
+    "SaphaerBMF": {
+        "purchased": 5,
+        "consumption": 0,
+        "stock": 5
+    },
+    "SaphaerCap": {
+        "purchased": 5,
+        "consumption": 0,
+        "stock": 5
+    },
+    "SaphaerMCB": {
+        "purchased": 6,
+        "consumption": 0,
+        "stock": 6
+    },
+    "Box": {
+        "stock": 4,
+        "purchased": 9,
+        "consumption": 5
+    },
+    "SaphaerBaitLabel": {
+        "stock": 3,
+        "purchased": 3,
+        "consumption": 0
+    }
+}
