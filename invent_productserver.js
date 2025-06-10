@@ -156,16 +156,14 @@ router.get('/stock/report/download/:product', (req, res) => {
         history.forEach(entry => {
             const { quantity, type, date } = entry;
             const inQty = type === 'IN' ? quantity : '';
-             runningStock += quantity;
             const outQty = type === 'OUT' ? quantity : '';
-             runningStock -= quantity;
             const remaining = stockData[productParam].purchased - stockData[productParam].consumption;
             const row = [
                 pad(productParam, colWidths[0]),
                 pad(new Date(date).toLocaleString(), colWidths[1]),
                 pad(inQty, colWidths[2]),
                 pad(outQty, colWidths[3]),
-                pad(runningStock, colWidths[4])
+                pad(remaining, colWidths[4])
             ];
             output += '|' + row.join('|') + '|\n';
         });
