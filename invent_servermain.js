@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const app = express();
 
 const PORT = process.env.PORT || 3000;
+const user = process.env.DB_USER;
+const password = process.env.DB_PASSWORD;
 
 // Middleware
 app.use(cors());
