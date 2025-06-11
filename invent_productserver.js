@@ -41,6 +41,12 @@ function capitalize(word) {
         .join(' ');
 }
 
+function findActualProductKey(inputName) {
+    const stock = readStock();
+    const lower = inputName.toLowerCase();
+    return Object.keys(stock).find(p => p.toLowerCase() === lower);
+}
+
 router.get('/', (req, res) => {
     res.send('Welcome to the Inventory Server!');
 });
@@ -49,76 +55,85 @@ router.get('/stock', (req, res) => {
     res.json(data);
 });
 router.get('/stock/:product', (req, res) => {
-    const product = decodeURIComponent(req.params.product).trim().toLowerCase();
-    const data = readStock();
-    if (data[product]) {
-        const productData = data[product];
-        const pending = productData.purchased - productData.consumption;
-        res.json({ ...productData, pending });
-    } else {
-        res.status(404).json({ error: 'Product not found' });
-    }
-});
-router.get('/stock/report/:product', (req, res) => {
-    const product = decodeURIComponent(req.params.product).trim().toLowerCase();
-    const data = readStock();  
-    if (!data[product]) {
+    const name = decodeURIComponent(req.params.product).trim();
+    const actualKey = findActualProductKey(name);
+    if (!actualKey) {
         return res.status(404).json({ error: 'Product not found' });
     }
-    const productData = data[product];
+    const data = readStock();
+    const productData = data[actualKey];
+    const pending = productData.purchased - productData.consumption;
+    res.json({ ...productData, pending });
+});
+router.get('/stock/report/:product', (req, res) => {
+    const name = decodeURIComponent(req.params.product).trim();
+    const actualKey = findActualProductKey(name);
+    if (!actualKey) {
+        return res.status(404).json({ error: 'Product not found' });
+    }
+    const data = readStock();  
+    const productData = data[actualKey];
     const pending = productData.purchased - productData.consumption;
     res.json({ ...productData, pending });
 });
 router.get('/stock/history/:product', (req, res) => {
-    const product = decodeURIComponent(req.params.product).trim().toLowerCase();
+    const name = decodeURIComponent(req.params.product).trim();
+    const actualKey = findActualProductKey(name);
+    if (!actualKey) {
+        return res.status(404).json({ error: 'Product not found' });
+    }
     const history = readHistory();
-    const filtered = history.filter(entry => entry.product === product);
+    const filtered = history.filter(entry => entry.product.toLowerCase() === actualKey.toLowerCase());
     res.json(filtered);
 });
 router.post('/stock/in', (req, res) => {
-    const product = (req.body.product || '').trim().toLowerCase();
+    const inputName = (req.body.product || '').trim();
     const quantity = req.body.quantity;
-    const stockData = readStock();
-    if (!stockData[product]) {
+    const actualKey = findActualProductKey(inputName); // ✅
+    if (!actualKey) {
         return res.status(404).json({ success: false, message: 'Product not found' });
     }
-    stockData[product].purchased += quantity;
-    stockData[product].stock = stockData[product].purchased - stockData[product].consumption;
+    const stockData = readStock();
+    stockData[actualKey].purchased += quantity;
+    stockData[actualKey].stock = stockData[actualKey].purchased - stockData[actualKey].consumption;
     writeStock(stockData);
     appendHistory({
         type: 'IN',
-        product,
+        product: actualKey,
         quantity,
         date: new Date().toISOString()
     });
-    res.json({ success: true, message: `Stock IN updated for ${product}` });
+    res.json({ success: true, message: `Stock IN updated for ${actualKey}` });
 });
 router.post('/stock/out', (req, res) => {
-    const { product, quantity } = req.body;
-    const stockData = readStock();
-    if (!stockData[product]) {
+    const inputName = (req.body.product || '').trim();
+    const quantity = req.body.quantity;
+    const actualKey = findActualProductKey(inputName); // ✅
+    if (!actualKey) {
         return res.status(404).json({ success: false, message: 'Product not found' });
     }
-    const available = (stockData[product].purchased || 0) - (stockData[product].consumption || 0);
+    const stockData = readStock();
+    const available = stockData[actualKey].purchased - stockData[actualKey].consumption;
     if (available < quantity) {
         return res.status(400).json({ success: false, message: "Not enough stock" });
     }
-    stockData[product].consumption += quantity;
-    stockData[product].stock = stockData[product].purchased - stockData[product].consumption;
+    stockData[actualKey].consumption += quantity;
+    stockData[actualKey].stock = stockData[actualKey].purchased - stockData[actualKey].consumption;
     writeStock(stockData);
     appendHistory({
         type: 'OUT',
-        product,
+        product: actualKey,
         quantity,
         date: new Date().toISOString()
     });
-    res.json({ success: true, message: `Stock OUT updated for ${product}` });
+    res.json({ success: true, message: `Stock OUT updated for ${actualKey}` });
 });
 router.post('/stock/addProduct', (req, res) => {
-    const name = (req.body.name || '').trim().toLowerCase();
+    const name = (req.body.name || '').trim();
     const quantity = req.body.quantity;
     const data = readStock();
-    if (data[name]) return res.status(400).json({ error: 'Product already exists' });
+    const exists = Object.keys(data).some(p => p.toLowerCase() === name.toLowerCase()); // ✅
+    if (exists) return res.status(400).json({ error: 'Product already exists' });
     data[name] = {
         stock: quantity,
         purchased: quantity,
@@ -138,14 +153,18 @@ router.get('/stock/history', (req, res) => {
     res.json(history);
 });
 router.get('/stock/report/download/:product', (req, res) => {
-    const productParam = decodeURIComponent(req.params.product).trim().toLowerCase();
+    const inputName = decodeURIComponent(req.params.product).trim();
+    const actualKey = findActualProductKey(inputName);
     const { fromDate, toDate } = req.query;
+
     try {
-        let history = readHistory().filter(entry => entry.product === productParam);
-        const stockData = readStock();
-        if (!stockData[productParam]) {
+        if (!actualKey) {
             return res.status(404).json({ error: 'Product not found' });
         }
+
+        let history = readHistory().filter(entry => entry.product.toLowerCase() === actualKey.toLowerCase());
+        const stockData = readStock();
+
         if (fromDate && toDate) {
             const from = new Date(fromDate);
             const to = new Date(toDate);
@@ -155,38 +174,41 @@ router.get('/stock/report/download/:product', (req, res) => {
                 return entryDate >= from && entryDate <= to;
             });
         }
+
         history.sort((a, b) => new Date(a.date) - new Date(b.date));
         const headers = ['Product', 'Date', 'IN Quantity', 'OUT Quantity', 'Remaining Stock'];
         const colWidths = [20, 25, 15, 15, 20];
         const pad = (str, width) => str.toString().padEnd(width, ' ');
         let output = '|' + headers.map((h, i) => pad(h, colWidths[i])).join('|') + '|\n';
         output += '+' + colWidths.map(w => '-'.repeat(w)).join('+') + '+\n';
+
         let runningPurchased = 0;
-let runningConsumption = 0;
+        let runningConsumption = 0;
 
-history.forEach(entry => {
-    const { quantity, type, date } = entry;
+        history.forEach(entry => {
+            const { quantity, type, date } = entry;
 
-    if (type === 'IN') {
-        runningPurchased += quantity;
-    } else if (type === 'OUT') {
-        runningConsumption += quantity;
-    }
+            if (type === 'IN') {
+                runningPurchased += quantity;
+            } else if (type === 'OUT') {
+                runningConsumption += quantity;
+            }
 
-    const remaining = runningPurchased - runningConsumption;
-    const inQty = type === 'IN' ? quantity : '';
-    const outQty = type === 'OUT' ? quantity : '';
+            const remaining = runningPurchased - runningConsumption;
+            const inQty = type === 'IN' ? quantity : '';
+            const outQty = type === 'OUT' ? quantity : '';
 
-    const row = [
-        pad(capitalize(productParam), colWidths[0]),
-        pad(new Date(date).toLocaleString(), colWidths[1]),
-        pad(inQty, colWidths[2]),
-        pad(outQty, colWidths[3]),
-        pad(remaining, colWidths[4])
-    ];
-    output += '|' + row.join('|') + '|\n';
-});
-        const filename = `Stock_Report_${productParam}_${new Date().toISOString().split('T')[0]}.txt`;
+            const row = [
+                pad(capitalize(actualKey), colWidths[0]), // ✅ capitalized for display
+                pad(new Date(date).toLocaleString(), colWidths[1]),
+                pad(inQty, colWidths[2]),
+                pad(outQty, colWidths[3]),
+                pad(remaining, colWidths[4])
+            ];
+            output += '|' + row.join('|') + '|\n';
+        });
+
+        const filename = `Stock_Report_${actualKey}_${new Date().toISOString().split('T')[0]}.txt`;
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Type', 'text/plain');
         res.send(output);
