@@ -153,20 +153,31 @@ router.get('/stock/report/download/:product', (req, res) => {
         const pad = (str, width) => str.toString().padEnd(width, ' ');
         let output = '|' + headers.map((h, i) => pad(h, colWidths[i])).join('|') + '|\n';
         output += '+' + colWidths.map(w => '-'.repeat(w)).join('+') + '+\n';
-        history.forEach(entry => {
-            const { quantity, type, date } = entry;
-            const inQty = type === 'IN' ? quantity : '';
-            const outQty = type === 'OUT' ? quantity : '';
-            const remaining = stockData[productParam].purchased - stockData[productParam].consumption;
-            const row = [
-                pad(productParam, colWidths[0]),
-                pad(new Date(date).toLocaleString(), colWidths[1]),
-                pad(inQty, colWidths[2]),
-                pad(outQty, colWidths[3]),
-                pad(remaining, colWidths[4])
-            ];
-            output += '|' + row.join('|') + '|\n';
-        });
+        let runningPurchased = 0;
+let runningConsumption = 0;
+
+history.forEach(entry => {
+    const { quantity, type, date } = entry;
+
+    if (type === 'IN') {
+        runningPurchased += quantity;
+    } else if (type === 'OUT') {
+        runningConsumption += quantity;
+    }
+
+    const remaining = runningPurchased - runningConsumption;
+    const inQty = type === 'IN' ? quantity : '';
+    const outQty = type === 'OUT' ? quantity : '';
+
+    const row = [
+        pad(productParam, colWidths[0]),
+        pad(new Date(date).toLocaleString(), colWidths[1]),
+        pad(inQty, colWidths[2]),
+        pad(outQty, colWidths[3]),
+        pad(remaining, colWidths[4])
+    ];
+    output += '|' + row.join('|') + '|\n';
+});
         const filename = `Stock_Report_${productParam}_${new Date().toISOString().split('T')[0]}.txt`;
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Type', 'text/plain');
