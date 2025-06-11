@@ -33,6 +33,14 @@ function appendHistory(entry) {
     history.push(entry);
     fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 4));
 }
+
+function capitalize(word) {
+    return word
+        .split(' ')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+}
+
 router.get('/', (req, res) => {
     res.send('Welcome to the Inventory Server!');
 });
@@ -41,7 +49,7 @@ router.get('/stock', (req, res) => {
     res.json(data);
 });
 router.get('/stock/:product', (req, res) => {
-    const product = decodeURIComponent(req.params.product).trim();
+    const product = decodeURIComponent(req.params.product).trim().toLowerCase();
     const data = readStock();
     if (data[product]) {
         const productData = data[product];
@@ -52,7 +60,7 @@ router.get('/stock/:product', (req, res) => {
     }
 });
 router.get('/stock/report/:product', (req, res) => {
-    const product = decodeURIComponent(req.params.product).trim();
+    const product = decodeURIComponent(req.params.product).trim().toLowerCase();
     const data = readStock();  
     if (!data[product]) {
         return res.status(404).json({ error: 'Product not found' });
@@ -62,13 +70,13 @@ router.get('/stock/report/:product', (req, res) => {
     res.json({ ...productData, pending });
 });
 router.get('/stock/history/:product', (req, res) => {
-    const product = decodeURIComponent(req.params.product).trim();
+    const product = decodeURIComponent(req.params.product).trim().toLowerCase();
     const history = readHistory();
     const filtered = history.filter(entry => entry.product === product);
     res.json(filtered);
 });
 router.post('/stock/in', (req, res) => {
-    const product = (req.body.product || '').trim();
+    const product = (req.body.product || '').trim().toLowerCase();
     const quantity = req.body.quantity;
     const stockData = readStock();
     if (!stockData[product]) {
@@ -107,7 +115,7 @@ router.post('/stock/out', (req, res) => {
     res.json({ success: true, message: `Stock OUT updated for ${product}` });
 });
 router.post('/stock/addProduct', (req, res) => {
-    const name = (req.body.name || '').trim();
+    const name = (req.body.name || '').trim().toLowerCase();
     const quantity = req.body.quantity;
     const data = readStock();
     if (data[name]) return res.status(400).json({ error: 'Product already exists' });
@@ -130,7 +138,7 @@ router.get('/stock/history', (req, res) => {
     res.json(history);
 });
 router.get('/stock/report/download/:product', (req, res) => {
-    const productParam = decodeURIComponent(req.params.product).trim();
+    const productParam = decodeURIComponent(req.params.product).trim().toLowerCase();
     const { fromDate, toDate } = req.query;
     try {
         let history = readHistory().filter(entry => entry.product === productParam);
@@ -170,7 +178,7 @@ history.forEach(entry => {
     const outQty = type === 'OUT' ? quantity : '';
 
     const row = [
-        pad(productParam, colWidths[0]),
+        pad(capitalize(productParam), colWidths[0]),
         pad(new Date(date).toLocaleString(), colWidths[1]),
         pad(inQty, colWidths[2]),
         pad(outQty, colWidths[3]),
