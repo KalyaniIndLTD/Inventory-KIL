@@ -196,29 +196,13 @@ router.get('/stock/report/download/:product', (req, res) => {
 
             const remaining = runningPurchased - runningConsumption;
 
-            const productMeta = stockData[actualKey];
-            const volumePerUnit = productMeta.volumePerUnit || 0;
-            const density = productMeta.density || null;
-
-            const totalVolume = volumePerUnit > 0 ? remaining * volumePerUnit : null;
-            const totalWeight = density && totalVolume ? (totalVolume * density).toFixed(2) : null;
-
-            let volumeNote = '';
-            if (totalVolume) {
-                volumeNote = ` (${totalVolume} ml`;
-                if (totalWeight) {
-                    volumeNote += `, ${totalWeight} g`;
-                }
-                volumeNote += `)`;
-            }
-          
             let inQty = '', outQty = '';
 
             const productMeta = stockData[actualKey];
             const volumePerUnit = productMeta.volumePerUnit || 0;
             const density = productMeta.density || null;
 
-            const calcVolume = (qty) => volumePerUnit ? qty * volumePerUnit : null;
+            const calcVolume = (qty) => volumePerUnit ? qty * volumePerUnit : null;        
             const calcWeight = (vol) => density && vol ? (vol * density).toFixed(2) : null;
 
             if (type === 'IN') {
@@ -231,8 +215,21 @@ router.get('/stock/report/download/:product', (req, res) => {
                 const wt = calcWeight(vol);
                 outQty = `${quantity}${vol ? ` (${vol} ml${wt ? `, ${wt} g` : ''})` : ''}`;
             }
+
+            // ✅ FIXED: calculate volumeNote for remaining
+            const totalVolume = calcVolume(remaining);
+            const totalWeight = calcWeight(totalVolume);
+            let volumeNote = '';
+            if (totalVolume) {
+                volumeNote = ` (${totalVolume} ml`;
+                if (totalWeight) {
+                    volumeNote += `, ${totalWeight} g`;
+                }
+                volumeNote += `)`;
+            }
+
             const row = [
-                pad(capitalize(actualKey), colWidths[0]), //  capitalized for display
+                pad(capitalize(actualKey), colWidths[0]),
                 pad(new Date(date).toLocaleString(), colWidths[1]),
                 pad(inQty, colWidths[2]),
                 pad(outQty, colWidths[3]),
