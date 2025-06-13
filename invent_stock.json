@@ -13,7 +13,8 @@
     "Oil": {
         "purchased": 9,
         "consumption": 4,
-        "stock": 5
+        "stock": 5,
+        "volumePerUnit": 850
     },
     "Sugar": {
         "purchased": 7,
