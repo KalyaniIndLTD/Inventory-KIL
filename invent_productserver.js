@@ -72,7 +72,7 @@ res.json({
     volumePerUnit,
     totalVolume
 });
-
+});
 router.get('/stock/report/:product', (req, res) => {
     const name = decodeURIComponent(req.params.product).trim();
     const actualKey = findActualProductKey(name);
