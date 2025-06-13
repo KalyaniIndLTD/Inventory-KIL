@@ -63,15 +63,7 @@ router.get('/stock/:product', (req, res) => {
     const data = readStock();
     const productData = data[actualKey];
     const pending = productData.purchased - productData.consumption;
-const volumePerUnit = productData.volumePerUnit || 0;
-const totalVolume = pending * volumePerUnit;
-
-res.json({
-    ...productData,
-    pending,
-    volumePerUnit,
-    totalVolume
-});
+    res.json({ ...productData, pending });
 });
 router.get('/stock/report/:product', (req, res) => {
     const name = decodeURIComponent(req.params.product).trim();
