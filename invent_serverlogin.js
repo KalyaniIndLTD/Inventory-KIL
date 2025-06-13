@@ -6,18 +6,36 @@ const bcrypt = require('bcryptjs');
 router.use(express.json());
 
 const USERS_FILE = 'invent_users.json';
+const ADMIN_FILE = 'invent_admins.json';
+
 const validAdminUsernames = ["srushti", "pihu", "admin1", "admin2"];
 
 // Admin login
 router.post('/admin-login', (req, res) => {
     const { username, password } = req.body;
-    
-    if (password !== "inventorykil@2025") {
-        return res.status(401).json({ success: false, message: "Invalid Admin Password" });
+
+    if (!username || !password) {
+        return res.status(400).json({ success: false, message: "Missing credentials" });
     }
 
-    // Accept any admin username
-    return res.json({ success: true, message: "Admin login successful" });
+    let admins = [];
+    if (fs.existsSync(ADMIN_FILE)) {
+        const data = fs.readFileSync(ADMIN_FILE, 'utf8');
+        admins = JSON.parse(data);
+    }
+
+    const admin = admins.find(a => a.username === username);
+    if (!admin) {
+        return res.status(404).json({ success: false, message: "Admin not found" });
+    }
+
+    bcrypt.compare(password, admin.password, (err, isMatch) => {
+        if (isMatch) {
+            return res.json({ success: true, message: "Admin login successful" });
+        } else {
+            return res.status(401).json({ success: false, message: "Incorrect password" });
+        }
+    });
 });
 
 // User login
