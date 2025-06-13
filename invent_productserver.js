@@ -198,35 +198,23 @@ router.get('/stock/report/download/:product', (req, res) => {
 
             let inQty = '', outQty = '';
 
-            const productMeta = stockData[actualKey];
-            const volumePerUnit = productMeta.volumePerUnit || 0;
-            const density = productMeta.density || null;
+        const productMeta = stockData[actualKey];
+        const volumePerUnit = productMeta.volumePerUnit || 0;
+        const density = productMeta.density || null;
 
-            const calcVolume = (qty) => volumePerUnit ? qty * volumePerUnit : null;        
-            const calcWeight = (vol) => density && vol ? (vol * density).toFixed(2) : null;
+        const calcVolume = (qty) => volumePerUnit ? qty * volumePerUnit : null;        
+        const calcWeight = (vol) => density && vol ? (vol * density).toFixed(2) : null;
 
-            if (type === 'IN') {
-                const vol = calcVolume(quantity);
-                const wt = calcWeight(vol);
-                inQty = `${quantity}${vol ? ` (${vol} ml${wt ? `, ${wt} g` : ''})` : ''}`;            
-            }
-            if (type === 'OUT') {
-                const vol = calcVolume(quantity);
-                const wt = calcWeight(vol);
-                outQty = `${quantity}${vol ? ` (${vol} ml${wt ? `, ${wt} g` : ''})` : ''}`;
-            }
+        if (type === 'IN') {
+            inQty = `${quantity}`; // plain
+        }
+        if (type === 'OUT') {
+            const vol = calcVolume(quantity);        
+            const wt = calcWeight(vol);
+            outQty = `${quantity}${vol ? ` (${vol} ml${wt ? `, ${wt} g` : ''})` : ''}`;
+        }
 
-            // ✅ FIXED: calculate volumeNote for remaining
-            const totalVolume = calcVolume(remaining);
-            const totalWeight = calcWeight(totalVolume);
             let volumeNote = '';
-            if (totalVolume) {
-                volumeNote = ` (${totalVolume} ml`;
-                if (totalWeight) {
-                    volumeNote += `, ${totalWeight} g`;
-                }
-                volumeNote += `)`;
-            }
 
             const row = [
                 pad(capitalize(actualKey), colWidths[0]),
