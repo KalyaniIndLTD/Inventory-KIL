@@ -195,6 +195,23 @@ router.get('/stock/report/download/:product', (req, res) => {
             }
 
             const remaining = runningPurchased - runningConsumption;
+
+            const productMeta = stockData[actualKey];
+            const volumePerUnit = productMeta.volumePerUnit || 0;
+            const density = productMeta.density || null;
+
+            const totalVolume = volumePerUnit > 0 ? remaining * volumePerUnit : null;
+            const totalWeight = density && totalVolume ? (totalVolume * density).toFixed(2) : null;
+
+            let volumeNote = '';
+            if (totalVolume) {
+                volumeNote = ` (${totalVolume} ml`;
+                if (totalWeight) {
+                    volumeNote += `, ${totalWeight} g`;
+                }
+                volumeNote += `)`;
+            }
+          
             const inQty = type === 'IN' ? quantity : '';
             const outQty = type === 'OUT' ? quantity : '';
 
@@ -203,7 +220,7 @@ router.get('/stock/report/download/:product', (req, res) => {
                 pad(new Date(date).toLocaleString(), colWidths[1]),
                 pad(inQty, colWidths[2]),
                 pad(outQty, colWidths[3]),
-                pad(remaining, colWidths[4])
+                pad(`${remaining}${volumeNote}`, colWidths[4])
             ];
             output += '|' + row.join('|') + '|\n';
         });
