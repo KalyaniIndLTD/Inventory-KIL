@@ -2,7 +2,8 @@
     "Saphaer": {
         "purchased": 6,
         "consumption": 0,
-        "stock": 6
+        "stock": 6,
+        "volumePerUnit": 850
     },
     "SaphaerLabel": {
         "purchased": 5,

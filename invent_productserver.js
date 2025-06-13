@@ -63,8 +63,16 @@ router.get('/stock/:product', (req, res) => {
     const data = readStock();
     const productData = data[actualKey];
     const pending = productData.purchased - productData.consumption;
-    res.json({ ...productData, pending });
+const volumePerUnit = productData.volumePerUnit || 0;
+const totalVolume = pending * volumePerUnit;
+
+res.json({
+    ...productData,
+    pending,
+    volumePerUnit,
+    totalVolume
 });
+
 router.get('/stock/report/:product', (req, res) => {
     const name = decodeURIComponent(req.params.product).trim();
     const actualKey = findActualProductKey(name);
@@ -89,7 +97,7 @@ router.get('/stock/history/:product', (req, res) => {
 router.post('/stock/in', (req, res) => {
     const inputName = (req.body.product || '').trim();
     const quantity = req.body.quantity;
-    const actualKey = findActualProductKey(inputName); // ✅
+    const actualKey = findActualProductKey(inputName); //
     if (!actualKey) {
         return res.status(404).json({ success: false, message: 'Product not found' });
     }
@@ -108,7 +116,7 @@ router.post('/stock/in', (req, res) => {
 router.post('/stock/out', (req, res) => {
     const inputName = (req.body.product || '').trim();
     const quantity = req.body.quantity;
-    const actualKey = findActualProductKey(inputName); // ✅
+    const actualKey = findActualProductKey(inputName); //
     if (!actualKey) {
         return res.status(404).json({ success: false, message: 'Product not found' });
     }
@@ -132,7 +140,7 @@ router.post('/stock/addProduct', (req, res) => {
     const name = (req.body.name || '').trim();
     const quantity = req.body.quantity;
     const data = readStock();
-    const exists = Object.keys(data).some(p => p.toLowerCase() === name.toLowerCase()); // ✅
+    const exists = Object.keys(data).some(p => p.toLowerCase() === name.toLowerCase()); //
     if (exists) return res.status(400).json({ error: 'Product already exists' });
     data[name] = {
         stock: quantity,
@@ -199,7 +207,7 @@ router.get('/stock/report/download/:product', (req, res) => {
             const outQty = type === 'OUT' ? quantity : '';
 
             const row = [
-                pad(capitalize(actualKey), colWidths[0]), // ✅ capitalized for display
+                pad(capitalize(actualKey), colWidths[0]), //  capitalized for display
                 pad(new Date(date).toLocaleString(), colWidths[1]),
                 pad(inQty, colWidths[2]),
                 pad(outQty, colWidths[3]),
