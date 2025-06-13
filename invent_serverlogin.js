@@ -8,8 +8,6 @@ router.use(express.json());
 const USERS_FILE = 'invent_users.json';
 const ADMIN_FILE = 'invent_admins.json';
 
-const validAdminUsernames = ["srushti", "pihu", "admin1", "admin2"];
-
 // Admin login
 router.post('/admin-login', (req, res) => {
     const { username, password } = req.body;
