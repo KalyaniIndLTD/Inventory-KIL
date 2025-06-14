@@ -24,14 +24,16 @@ router.post('/admin-login', (req, res) => {
 
     const admin = admins.find(a => a.username === username);
     if (!admin) {
-        return res.status(404).json({ success: false, message: "Admin not found" });
-    }
+    console.log("Admin not found:", username);
+    return res.status(404).json({ success: false, message: `Admin '${username}' not found` });
+}
 
     bcrypt.compare(password, admin.password, (err, isMatch) => {
         if (isMatch) {
             return res.json({ success: true, message: "Admin login successful" });
         } else {
-            return res.status(401).json({ success: false, message: "Incorrect password" });
+             console.log("Password incorrect for user:", username);
+             return res.status(401).json({ success: false, message: `Incorrect password for '${username}'` });
         }
     });
 });
