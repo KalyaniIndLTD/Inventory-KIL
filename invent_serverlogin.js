@@ -8,6 +8,39 @@ router.use(express.json());
 const USERS_FILE = 'invent_users.json';
 const ADMIN_FILE = 'invent_admins.json';
 
+// ✅ One-time Admin Registration Route
+router.post('/admin-register', (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ success: false, message: "Missing credentials" });
+    }
+
+    // Read existing admins from file
+    let admins = [];
+    if (fs.existsSync(ADMIN_FILE)) {
+        const data = fs.readFileSync(ADMIN_FILE, 'utf8');
+        admins = JSON.parse(data);
+    }
+
+    // Check if admin already registered
+    const exists = admins.find(a => a.username === username);
+    if (exists) {
+        return res.status(409).json({ success: false, message: "Admin already registered — please log in" });
+    }
+
+    // Hash and save new admin
+    bcrypt.hash(password, 10, (err, hash) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: "Failed to hash password" });
+        }
+
+        admins.push({ username, password: hash });
+        fs.writeFileSync(ADMIN_FILE, JSON.stringify(admins, null, 2));
+        res.json({ success: true, message: "Admin registered successfully" });
+    });
+});
+
 // Admin login
 router.post('/admin-login', (req, res) => {
     const { username, password } = req.body;
