@@ -11,6 +11,7 @@ const ADMIN_FILE = 'invent_admins.json';
 // Admin login
 router.post('/admin-login', (req, res) => {
     const { username, password } = req.body;
+    console.log("Admin login attempt:", username);
 
     if (!username || !password) {
         return res.status(400).json({ success: false, message: "Missing credentials" });
@@ -19,21 +20,27 @@ router.post('/admin-login', (req, res) => {
     let admins = [];
     if (fs.existsSync(ADMIN_FILE)) {
         const data = fs.readFileSync(ADMIN_FILE, 'utf8');
+        console.log("Admin file raw data:", data); // 👈 LOG THIS
         admins = JSON.parse(data);
     }
 
+    console.log("Parsed admins:", admins); // 👈 LOG THIS
     const admin = admins.find(a => a.username === username);
     if (!admin) {
-    console.log("Admin not found:", username);
-    return res.status(404).json({ success: false, message: `Admin '${username}' not found` });
-}
+        return res.status(404).json({ success: false, message: `Admin '${username}' not found` });
+    }
 
     bcrypt.compare(password, admin.password, (err, isMatch) => {
+        if (err) {
+            console.log("Bcrypt error:", err);
+            return res.status(500).json({ success: false, message: "Bcrypt comparison failed" });
+        }
+
         if (isMatch) {
             return res.json({ success: true, message: "Admin login successful" });
         } else {
-             console.log("Password incorrect for user:", username);
-             return res.status(401).json({ success: false, message: `Incorrect password for '${username}'` });
+            console.log("Password mismatch for:", username);
+            return res.status(401).json({ success: false, message: `Incorrect password for '${username}'` });
         }
     });
 });
