@@ -176,11 +176,9 @@ router.get('/stock/report/download/:product', (req, res) => {
         }
 
         history.sort((a, b) => new Date(a.date) - new Date(b.date));
-        const headers = ['Product', 'Date', 'IN Quantity', 'OUT Quantity', 'Remaining Stock'];
-        const colWidths = [20, 25, 15, 15, 20];
-        const pad = (str, width) => str.toString().padEnd(width, ' ');
-        let output = '|' + headers.map((h, i) => pad(h, colWidths[i])).join('|') + '|\n';
-        output += '+' + colWidths.map(w => '-'.repeat(w)).join('+') + '+\n';
+
+        // CSV Header
+        let output = 'Product,Date,IN Quantity,OUT Quantity,Remaining Stock\n';
 
         let runningPurchased = 0;
         let runningConsumption = 0;
@@ -196,43 +194,37 @@ router.get('/stock/report/download/:product', (req, res) => {
 
             const remaining = runningPurchased - runningConsumption;
 
-            let inQty = '', outQty = '';
+            const productMeta = stockData[actualKey];
+            const volumePerUnit = productMeta.volumePerUnit || 0;
+            const density = productMeta.density || null;
 
-        const productMeta = stockData[actualKey];
-        const volumePerUnit = productMeta.volumePerUnit || 0;
-        const density = productMeta.density || null;
+            const calcVolume = (qty) => volumePerUnit ? qty * volumePerUnit : null;
+            const calcWeight = (vol) => density && vol ? (vol * density).toFixed(2) : null;
 
-        const calcVolume = (qty) => volumePerUnit ? qty * volumePerUnit : null;        
-        const calcWeight = (vol) => density && vol ? (vol * density).toFixed(2) : null;
+            let inQty = '';
+            let outQty = '';
 
-        if (type === 'IN') {
-            inQty = `${quantity}`; // plain
-        }
-        if (type === 'OUT') {
-            const vol = calcVolume(quantity);        
-            const wt = calcWeight(vol);
-            outQty = `${quantity}${vol ? ` (${vol} ml${wt ? `, ${wt} g` : ''})` : ''}`;
-        }
+            if (type === 'IN') {
+                inQty = quantity;
+            }
+            if (type === 'OUT') {
+                const vol = calcVolume(quantity);
+                const wt = calcWeight(vol);
+                outQty = `${quantity}${vol ? ` (${vol} ml${wt ? `, ${wt} g` : ''})` : ''}`;
+            }
 
-            let volumeNote = '';
-
-            const row = [
-                pad(capitalize(actualKey), colWidths[0]),
-                pad(new Date(date).toLocaleString(), colWidths[1]),
-                pad(inQty, colWidths[2]),
-                pad(outQty, colWidths[3]),
-                pad(`${remaining}${volumeNote}`, colWidths[4])
-            ];
-            output += '|' + row.join('|') + '|\n';
+            output += `"${capitalize(actualKey)}","${new Date(date).toLocaleString()}","${inQty}","${outQty}","${remaining}"\n`;
         });
 
-        const filename = `Stock_Report_${actualKey}_${new Date().toISOString().split('T')[0]}.txt`;
+        const filename = `Stock_Report_${actualKey}_${new Date().toISOString().split('T')[0]}.csv`;
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Type', 'text/csv');
         res.send(output);
+
     } catch (error) {
         console.error('Error in /stock/report/download/:product', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 module.exports = router;
